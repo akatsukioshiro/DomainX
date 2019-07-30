@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<style>
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: Arial;
+  font-size: 17px;
+}
+#myVideo {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  min-width: 100%; 
+  min-height: 100%;
+}
+.content {
+  position: fixed;
+  display:block;
+  margin :0;
+  background: rgba(255,255,255, 0);
+  color: #f1f1f1;
+  width: 100%;
+  height:100%;
+  padding: 0px;
+  cursor:none;
+  outline:0px;
+}
+#poly
+{
+pointer-event:none;
+}
+#loginbox {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  z-index: 15;
+  margin: -10px 0 0 -10px;
+  background: rgba(0,0,0,0.6);
+  border-style: solid;
+  border-width: 0px 0px 0px 0px;
+  border-radius: 50%;
+  border-color: rgba(255,255,255,1) rgba(255,255,255,0.4) rgba(255,255,255,0.4) rgba(255,255,255,0.6);
+  box-shadow: 0 0 18px 8px #0276FD;
+}
+.fm::selection 
+{
+    background-color:transparent;
+} 
+.fm::-moz-selection
+{
+    background-color:transparent;
+}
+.fm
+{        
+    -webkit-user-select: none;
+    -moz-user-select: -moz-none;
+    /*IE10*/
+    -ms-user-select: none;
+    user-select: none;
+    /*You just need this if you are only concerned with android and not desktop browsers.*/
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}    
+input[type="text"], textarea, [contenteditable]
+{
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+</style>
+</head>
+<body onload="document.getElementById('pop').focus()">
+
+<video autoplay muted loop id="myVideo">
+  <source src="MOVE.mp4" type="video/mp4">
+  Your browser does not support HTML5 video.
+</video>
+
+<div id="pop" class="content" onmousedown="shoot(event)" onmouseup="reload()" tabindex="0" onkeypress="draw(event)">
+<svg id="con" version="1.1" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%; position: absolute;"></svg>
+<form name="Show" class="fm">
+<input class="fm" type="text" name="MouseX" value="0" size="7"> X<br>
+<input class="fm" type="text" name="MouseY" value="0" size="7"> Y<br>
+</form>
+<div id="loginbox" ></div>  
+</div>
+
+<script language="javascript">
+var sx=0;
+var sy=0;
+var ex=0;
+var ey=0;
+var press=0;
+var sizer=0;
+var inv=0;
+var strokew=80;
+var erase=0;
+var lin="";
+var s= document.all?true:false
+if (!s) document.captureEvents(Event.MOUSEMOVE)
+document.onmousemove = getMouseXY;
+var tempX = 0
+var tempY = 0
+document.getElementById('loginbox').style.left=0+"%";
+document.getElementById('loginbox').style.top=0+"%";
+function getMouseXY(e) {
+  if (s) { 
+    tempX = event.clientX + document.body.scrollLeft
+    tempY = event.clientY + document.body.scrollTop
+  } else {  
+    tempX = e.pageX
+    tempY = e.pageY
+  }  
+  if (tempX < 0){tempX = 0}
+  if (tempY < 0){tempY = 0}  
+document.Show.MouseX.value = tempX
+  document.Show.MouseY.value = tempY
+var xx=(tempX/screen.width)*100
+var yy=(tempY/screen.height)*115
+//console.log(xx);
+//console.log(yy);
+  document.getElementById('loginbox').style.left =xx+"%"
+  document.getElementById('loginbox').style.top =yy+"%"
+  
+if(press===1)
+{
+	lin=lin+tempX+","+tempY+" ";
+}
+  return true
+}
+function reload()
+{
+//alert(lin);
+ex=document.Show.MouseX.value;
+ey=document.Show.MouseY.value;
+if(press===1 && erase===0)poly(lin,strokew);//svg(sx,sy,ex,ey);
+if(press===1 && erase===1)eraser(lin,strokew);
+document.getElementById('loginbox').style.boxShadow = "0px 0px 18px 8px #0276FD";
+}
+function shoot(event)
+{lin="";
+sx=document.Show.MouseX.value;
+sy=document.Show.MouseY.value;
+if(event.button===0)document.getElementById('loginbox').style.boxShadow = "0px 0px 18px 8px red";
+else if(event.button===2)
+{
+document.getElementById('loginbox').style.boxShadow = "0px 0px 18px 8px green";
+var master = document.getElementById('con');
+for(var i=document.getElementsByTagName('polyline').length;i>=1;i--)
+{
+master.removeChild(document.getElementsByTagName('polyline')[0]);
+}
+}
+}
+function svg(x1,y1,x2,y2) {
+var newLine = document.createElementNS('http://www.w3.org/2000/svg','line');
+newLine.setAttribute('id','line2');
+newLine.setAttribute('x1',x1);
+newLine.setAttribute('y1',y1);
+newLine.setAttribute('x2',x2);
+newLine.setAttribute('y2',y2);
+newLine.setAttribute("stroke", "white");
+newLine.setAttribute("stroke-width",20);
+document.getElementById('con').appendChild(newLine);
+}
+function poly(lin,strokew) {
+var newLine = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+newLine.setAttribute('id','poly');
+newLine.setAttribute('points',lin);
+newLine.setAttribute("stroke", "white");
+newLine.setAttribute("stroke-width",strokew);
+newLine.setAttribute("fill","none");
+document.getElementById('con').appendChild(newLine);
+}
+function draw(event)
+{
+var x = event.which || event.keyCode;
+if((x===122 || x===90) && press===0)
+{
+press=1;
+document.getElementById('loginbox').style.height="100px";
+document.getElementById('loginbox').style.width="100px";
+document.getElementById('loginbox').style.margin = "-50px 0px 0px -50px";
+strokew=80;
+}
+else if((x===73 || x===105) && press===1)
+{
+if(inv===0)
+{
+document.getElementById('con').style.height="0%";
+document.getElementById('con').style.width="0p%";
+inv=1;
+}
+else if(inv===1)
+{
+document.getElementById('con').style.height="100%";
+document.getElementById('con').style.width="100%";
+inv=0;
+} 
+}
+else if((x===69 || x===101) && press===1)
+{
+if(erase===0)
+{
+erase=1;
+}
+else if(erase===1)
+{
+erase=0;
+} 
+}
+else if((x===43 || x===61) && press===1)
+{console.log(x);
+if(sizer===0)
+{
+document.getElementById('loginbox').style.height="150px";
+document.getElementById('loginbox').style.width="150px";
+document.getElementById('loginbox').style.margin = "-75px 0px 0px -75px";
+sizer=1;
+strokew=130;
+}
+else if(sizer===1)
+{
+document.getElementById('loginbox').style.height="200px";
+document.getElementById('loginbox').style.width="200px";
+document.getElementById('loginbox').style.margin = "-100px 0px 0px -100px";
+sizer=2;
+strokew=180;
+}
+else if(sizer===2)
+{
+document.getElementById('loginbox').style.height="250px";
+document.getElementById('loginbox').style.width="250px";
+document.getElementById('loginbox').style.margin = "-125px 0px 0px -125px";
+sizer=3;
+strokew=230;
+}
+else if(sizer===3)
+{
+document.getElementById('loginbox').style.height="300px";
+document.getElementById('loginbox').style.width="300px";
+document.getElementById('loginbox').style.margin = "-150px 0px 0px -150px";
+sizer=4;
+strokew=280;
+}
+}
+else if((x===45 || x===95) && press===1)
+{
+console.log(x);
+if(sizer===1)
+{
+document.getElementById('loginbox').style.height="100px";
+document.getElementById('loginbox').style.width="100px";
+document.getElementById('loginbox').style.margin = "-50px 0px 0px -50px";
+sizer=0;
+strokew=80;
+}
+else if(sizer===2)
+{
+document.getElementById('loginbox').style.height="150px";
+document.getElementById('loginbox').style.width="150px";
+document.getElementById('loginbox').style.margin = "-75px 0px 0px -75px";
+sizer=1;
+strokew=130;
+}
+else if(sizer===3)
+{
+document.getElementById('loginbox').style.height="200px";
+document.getElementById('loginbox').style.width="200px";
+document.getElementById('loginbox').style.margin = "-100px 0px 0px -100px";
+sizer=2;
+strokew=180;
+}
+else if(sizer===4)
+{
+document.getElementById('loginbox').style.height="250px";
+document.getElementById('loginbox').style.width="250px";
+document.getElementById('loginbox').style.margin = "-125px 0px 0px -125px";
+sizer=3;
+strokew=230;
+}
+}
+else if((x===122 || x===90) && press===1)
+{
+press=0;
+document.getElementById('loginbox').style.height="20px";
+document.getElementById('loginbox').style.width="20px";
+document.getElementById('loginbox').style.margin = "-10px 0px 0px -10px";
+}
+}
+function eraser(lin,strokew)
+{
+var correct="";
+var re=new RegExp(",", 'g');
+lin=lin.replace(re," ");
+var toErase=lin.split(" ");
+toErase.pop();
+//alert(toErase);
+var all="";
+for(var i=0;i<document.getElementsByTagName('polyline').length;i++)
+{
+var doc=document.getElementsByTagName('polyline')[i];
+var pts=doc.getAttribute('points');
+pts=pts.replace(re," ");
+var toE=pts.split(" ");
+toE.pop();
+//alert(toE);
+for(var ch=0;ch<toErase.length-1;ch+=2)
+for(var c=0;c<toE.length-1;c+=2)
+if((toErase[ch]===toE[c])||(toErase[ch+1]===toE[c+1]))
+all=toErase[ch]+","+toErase[ch+1]+" "+all;
+doc.setAttribute('points',all);
+
+}
+}
+</script>
+
+</body>
+</html>
